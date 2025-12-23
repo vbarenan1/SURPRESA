@@ -2,170 +2,119 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Surpresa</title>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
     <style>
-        :root { --sp-green: #1DB954; --pink: #f037a5; --orange: #f59b23; }
-        body, html { margin: 0; padding: 0; background: #000; color: white; font-family: 'Inter', sans-serif; overflow: hidden; height: 100%; }
-        #main-wrapper { width: 100%; height: 100vh; max-width: 450px; margin: 0 auto; position: relative; overflow: hidden; }
-        #cover-screen { position: absolute; inset: 0; z-index: 1000; background: #000; display: flex; align-items: center; justify-content: center; text-align: center; }
-        .glow-text { font-family: 'Archivo Black'; font-size: 2.5rem; letter-spacing: 5px; margin-bottom: 20px; }
-        .progress-container { width: 200px; height: 2px; background: rgba(255,255,255,0.1); margin: 20px auto; overflow: hidden; }
-        #loader-fill { width: 0%; height: 100%; background: var(--sp-green); }
-        #btn-play { background: #555; color: #ccc; border: none; padding: 15px 40px; border-radius: 50px; font-weight: 900; cursor: pointer; transition: 0.5s; }
-        #btn-play.ready { background: var(--sp-green); color: white; animation: pulse 1.5s infinite; }
-        .bg-layer { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 0.8s ease-in-out, transform 15s linear; z-index: 1; filter: brightness(0.6); }
-        .bg-layer.active { opacity: 1; z-index: 2; transform: scale(1.15); }
-        .vignette { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.9) 100%); z-index: 3; pointer-events: none; }
-        #progress-header { position: absolute; top: 15px; width: 100%; display: flex; gap: 4px; padding: 0 10px; z-index: 100; box-sizing: border-box; }
-        .progress-bar { height: 3px; background: rgba(255,255,255,0.2); flex: 1; border-radius: 2px; overflow: hidden; }
-        .progress-fill { height: 100%; background: white; width: 0%; }
-        .content { position: absolute; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
-        .story-h1 { font-family: 'Archivo Black'; font-size: 2.8rem; text-transform: uppercase; line-height: 0.9; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .slot-machine { display: flex; font-family: 'Archivo Black'; font-size: 5rem; color: var(--sp-green); height: 110px; overflow: hidden; margin-bottom: 20px; }
-        .slot-column span { height: 110px; display: flex; align-items: center; justify-content: center; }
-        .emotional-text { font-family: 'Archivo Black'; font-size: 1.4rem; text-transform: uppercase; line-height: 1.2; color: white; width: 100%; max-width: 400px; margin-top: 20px; }
-        .touch-zones { position: absolute; inset: 0; z-index: 200; display: flex; }
-        .zone-left, .zone-right { flex: 1; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(29,185,84,0.7); } 70% { box-shadow: 0 0 0 15px rgba(29,185,84,0); } 100% { box-shadow: 0 0 0 0 rgba(29,185,84,0); } }
+        :root { --sp-green: #1DB954; }
+        body, html { margin: 0; padding: 0; background: #000; color: white; font-family: sans-serif; overflow: hidden; height: 100%; width: 100%; }
+        
+        /* TELA DE ENTRADA FORÇADA */
+        #cover-screen { position: fixed; inset: 0; z-index: 9999; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .glow-text { font-family: 'Archivo Black', sans-serif; font-size: 2.5rem; margin-bottom: 30px; }
+        #btn-play { background: var(--sp-green); color: white; border: none; padding: 20px 50px; border-radius: 50px; font-weight: 900; font-size: 1.2rem; cursor: pointer; display: block !important; }
+
+        /* STORIES */
+        #story-viewport { display: none; position: relative; width: 100%; height: 100vh; background: #111; }
+        .bg-layer { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 0.5s; filter: brightness(0.6); }
+        .bg-layer.active { opacity: 1; }
+        .content { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        .story-h1 { font-family: 'Archivo Black', sans-serif; font-size: 2.5rem; text-transform: uppercase; line-height: 1; }
+        
+        /* CONTADOR */
+        #counter-box { display: none; flex-direction: column; align-items: center; }
+        .slot-machine { display: flex; font-family: 'Archivo Black'; font-size: 4rem; color: var(--sp-green); height: 80px; overflow: hidden; }
+        .slot-column span { height: 80px; display: flex; align-items: center; justify-content: center; }
+        
+        #progress-header { position: absolute; top: 10px; width: 100%; display: flex; gap: 5px; padding: 0 10px; box-sizing: border-box; z-index: 100; }
+        .p-bar { height: 3px; background: rgba(255,255,255,0.3); flex: 1; }
+        .p-fill { height: 100%; background: #fff; width: 0%; }
+        .touch-zones { position: absolute; inset: 0; z-index: 50; display: flex; }
+        .zone { flex: 1; }
     </style>
 </head>
 <body>
 
-<audio id="music" preload="auto" loop>
-    <source src="https://www.dropbox.com/scl/fi/om1dgkxnjm4qms6xngj8q/WIU-Rol-de-Sempre-INSTRUMENTAL-8-Nota-Produ-es-youtube.mp3?rlkey=ibyl68ixd7xywgs8vwjqowtk2&st=y9t3rmt3&raw=1" type="audio/mpeg">
-</audio>
+<audio id="music" loop><source src="https://www.dropbox.com/scl/fi/om1dgkxnjm4qms6xngj8q/WIU-Rol-de-Sempre-INSTRUMENTAL-8-Nota-Produ-es-youtube.mp3?rlkey=ibyl68ixd7xywgs8vwjqowtk2&st=y9t3rmt3&raw=1" type="audio/mpeg"></audio>
 
-<div id="main-wrapper">
-    <div id="cover-screen">
-        <div class="loader-content">
-            <h1 class="glow-text">SURPRESA</h1>
-            <div class="progress-container"><div id="loader-fill"></div></div>
-            <button id="btn-play" onclick="startEverything()" disabled>CARREGANDO...</button>
-        </div>
-    </div>
+<div id="cover-screen">
+    <h1 class="glow-text">SURPRESA</h1>
+    <button id="btn-play" onclick="start()">VER SURPRESA</button>
+</div>
 
-    <div id="story-viewport" style="display:none;">
-        <div id="bg-1" class="bg-layer active"></div>
-        <div id="bg-2" class="bg-layer"></div>
-        <div class="vignette"></div>
-        <div id="progress-header"></div>
-        <div class="content">
-            <h1 id="story-text" class="story-h1"></h1>
-            <div id="counter-box" style="display:none;">
-                <div class="slot-machine">
-                    <div class="slot-wrapper"><div id="slot-days" class="slot-column"></div></div>
-                    <span class="slot-separator">/</span>
-                    <div class="slot-wrapper"><div id="slot-months" class="slot-column"></div></div>
-                </div>
-            </div>
-            <div id="emotional-msg" class="emotional-text animate__animated" style="display:none;"></div>
+<div id="story-viewport">
+    <div id="progress-header"></div>
+    <div id="bg-1" class="bg-layer active"></div>
+    <div id="bg-2" class="bg-layer"></div>
+    <div class="content">
+        <h1 id="story-text" class="story-h1"></h1>
+        <div id="counter-box">
+            <div class="slot-machine"><div id="slot-days" class="slot-column"></div><span>/</span><div id="slot-months" class="slot-column"></div></div>
         </div>
-        <div class="touch-zones">
-            <div class="zone-left" onclick="prevStory()"></div>
-            <div class="zone-right" onclick="nextStory()"></div>
-        </div>
+        <div id="emo-msg" style="display:none; font-family:'Archivo Black'; font-size:1.2rem;"></div>
     </div>
+    <div class="touch-zones"><div class="zone" onclick="change(-1)"></div><div class="zone" onclick="change(1)"></div></div>
 </div>
 
 <script>
     const stories = [
-        { text: "Oi,<br>você tem<br>um minuto?", img: "https://www.dropbox.com/scl/fi/cilbo22puwfefipkj8dp0/Foto-29-11-2025-04-38-14.jpg?rlkey=i11o4u9u7acsyybqksgwzzznh&st=y8y5bf6o&raw=1", anim: "animate__fadeInUp" },
-        { text: "Quer dizer,<br>temos 30 dias<br>pra rever.", img: "https://www.dropbox.com/scl/fi/jtntnn3ftxmuito3o1n33/Foto-23-12-2025-08-16-07.webp?rlkey=vxklmgd83lkj87nrvx5f4kfvk&st=h53iy4tz&raw=1", anim: "animate__fadeInLeft" },
-        { text: "Se sua vida<br>fosse uma<br><span style='color:var(--pink)'>playlist</span>...", img: "https://www.dropbox.com/scl/fi/l5xadpcs7ddvo3i0or6gh/Foto-23-12-2025-08-16-07.jpg?rlkey=g0vkz13u34qwbui1hydjtcu62&st=n2iwkvvv&raw=1", anim: "animate__zoomIn" },
-        { text: "Eu seria o seu<br><span style='color:var(--orange)'>artista</span><br>nº 1?", img: "https://www.dropbox.com/scl/fi/170dct6q7ntgztg1nhdlb/Foto-20-12-2025-22-55-36.jpg?rlkey=4rfiomr59zzop4r9fdsag0f13&st=nxmn4p9s&raw=1", anim: "animate__fadeInRight" },
-        { text: "Porque você<br>com certeza<br>é a minha.", img: "https://www.dropbox.com/scl/fi/9jg1csw1caq78fqi59w3n/Foto-15-12-2025-00-52-54.jpg?rlkey=4wxsc6pun987a4me1e0z880jo&st=vjuejbsg&raw=1", anim: "animate__backInDown" },
-        { isCounter: true, img: "https://www.dropbox.com/scl/fi/cyqn5rgv2ehks74a4umgz/Foto-14-12-2025-02-43-07.jpg?rlkey=mafffe76hobq6cb5p5p5d6lxs&st=ymco6a3q&raw=1" },
-        { text: "30 dias de<br><span style='color:var(--sp-green)'>risadas</span><br>e fofocas.", img: "https://www.dropbox.com/scl/fi/syqqpnhf2amowocjydn76/Foto-10-12-2025-15-10-20.jpg?rlkey=eihtdcg05mkfcrjrqmvdomgta&st=bn399dcq&raw=1", anim: "animate__bounceIn" },
-        { text: "30 dias<br>descobrindo<br>quem você é.", img: "https://www.dropbox.com/scl/fi/ft8eydm3p9hzwrn88j5o0/Foto-10-12-2025-14-41-52.jpg?rlkey=hakj1gy5pf6c8ans9zawn88x4&st=qmty86df&raw=1", anim: "animate__fadeInUpBig" },
-        { text: "E quer<br>saber?", img: "https://www.dropbox.com/scl/fi/rn5bjqwnrbsujvj2oobh3/Foto-06-12-2025-16-13-45.jpg?rlkey=p9fn3gunxs3o53c5003u83qen&st=kysj3v0v&raw=1", anim: "animate__flipInY" },
-        { text: "Eu amei cada<br><span style='color:var(--pink)'>batida</span><br>desse som.", img: "https://www.dropbox.com/scl/fi/bhnno9y9yl713gusj5ol9/Foto-03-12-2025-05-54-54.jpg?rlkey=1mc8p519nbgu3lxuyf0ec3he8&st=chd7247z&raw=1", anim: "animate__zoomInUp" },
-        { text: "Obrigado por<br>esse mês<br>incrível.", img: "https://www.dropbox.com/scl/fi/wmobvohy0kokqeulvmkxm/Foto-01-12-2025-04-04-11.jpg?rlkey=ti9pgszqajfitmgnsgyg9ub1x&st=06z1ayd0&raw=1", anim: "animate__heartBeat" }
+        { t: "Oi,<br>você tem<br>um minuto?", i: "https://www.dropbox.com/scl/fi/cilbo22puwfefipkj8dp0/Foto-29-11-2025-04-38-14.jpg?rlkey=i11o4u9u7acsyybqksgwzzznh&raw=1" },
+        { t: "Quer dizer,<br>temos 30 dias<br>pra rever.", i: "https://www.dropbox.com/scl/fi/jtntnn3ftxmuito3o1n33/Foto-23-12-2025-08-16-07.webp?rlkey=vxklmgd83lkj87nrvx5f4kfvk&raw=1" },
+        { t: "Se sua vida<br>fosse uma<br>playlist...", i: "https://www.dropbox.com/scl/fi/l5xadpcs7ddvo3i0or6gh/Foto-23-12-2025-08-16-07.jpg?rlkey=g0vkz13u34qwbui1hydjtcu62&raw=1" },
+        { t: "Eu seria o seu<br>artista<br>nº 1?", i: "https://www.dropbox.com/scl/fi/170dct6q7ntgztg1nhdlb/Foto-20-12-2025-22-55-36.jpg?rlkey=4rfiomr59zzop4r9fdsag0f13&raw=1" },
+        { t: "Porque você<br>com certeza<br>é a minha.", i: "https://www.dropbox.com/scl/fi/9jg1csw1caq78fqi59w3n/Foto-15-12-2025-00-52-54.jpg?rlkey=4wxsc6pun987a4me1e0z880jo&raw=1" },
+        { count: true, i: "https://www.dropbox.com/scl/fi/cyqn5rgv2ehks74a4umgz/Foto-14-12-2025-02-43-07.jpg?rlkey=mafffe76hobq6cb5p5p5d6lxs&raw=1" },
+        { t: "30 dias de<br>risadas<br>e fofocas.", i: "https://www.dropbox.com/scl/fi/syqqpnhf2amowocjydn76/Foto-10-12-2025-15-10-20.jpg?rlkey=eihtdcg05mkfcrjrqmvdomgta&raw=1" },
+        { t: "30 dias<br>descobrindo<br>quem você é.", i: "https://www.dropbox.com/scl/fi/ft8eydm3p9hzwrn88j5o0/Foto-10-12-2025-14-41-52.jpg?rlkey=hakj1gy5pf6c8ans9zawn88x4&raw=1" },
+        { t: "E quer<br>saber?", i: "https://www.dropbox.com/scl/fi/rn5bjqwnrbsujvj2oobh3/Foto-06-12-2025-16-13-45.jpg?rlkey=p9fn3gunxs3o53c5003u83qen&raw=1" },
+        { t: "Eu amei cada<br>batida<br>desse som.", i: "https://www.dropbox.com/scl/fi/bhnno9y9yl713gusj5ol9/Foto-03-12-2025-05-54-54.jpg?rlkey=1mc8p519nbgu3lxuyf0ec3he8&raw=1" },
+        { t: "Obrigado por<br>esse mês<br>incrível.", i: "https://www.dropbox.com/scl/fi/wmobvohy0kokqeulvmkxm/Foto-01-12-2025-04-04-11.jpg?rlkey=ti9pgszqajfitmgnsgyg9ub1x&raw=1" }
     ];
 
-    let currentIdx = 0, storyTimeout;
-    const duration = 15000;
+    let curr = 0, timer;
+    const hdr = document.getElementById('progress-header');
+    stories.forEach(() => hdr.innerHTML += '<div class="p-bar"><div class="p-fill"></div></div>');
+    const fills = document.querySelectorAll('.p-fill');
 
-    // FORÇA A LIBERAÇÃO DO BOTÃO EM 2 SEGUNDOS INDEPEDENTE DE ERROS
-    window.addEventListener('DOMContentLoaded', () => {
-        const fill = document.getElementById('loader-fill');
-        const btn = document.getElementById('btn-play');
-        
-        fill.style.transition = "width 2s ease-in-out";
-        fill.style.width = "100%";
-
-        setTimeout(() => {
-            btn.innerText = "VER SURPRESA";
-            btn.disabled = false;
-            btn.classList.add('ready');
-        }, 2100);
-    });
-
-    const fills = stories.map(() => {
-        const b = document.createElement('div'); b.className = 'progress-bar'; b.innerHTML = '<div class="progress-fill"></div>';
-        document.getElementById('progress-header').appendChild(b); return b.querySelector('.progress-fill');
-    });
-
-    function startEverything() {
+    function start() {
         document.getElementById('cover-screen').style.display = 'none';
         document.getElementById('story-viewport').style.display = 'block';
-        try { document.getElementById('music').play(); } catch(e) { console.log("Audio block"); }
-        showStory(0);
+        document.getElementById('music').play().catch(() => {});
+        show(0);
     }
 
-    function showStory(idx) {
-        if (idx < 0 || idx >= stories.length) return;
-        currentIdx = idx; clearTimeout(storyTimeout);
+    function show(idx) {
+        if(idx < 0 || idx >= stories.length) return;
+        curr = idx; clearTimeout(timer);
         const s = stories[idx];
-        const bgA = document.querySelector('.bg-layer.active') || document.getElementById('bg-1');
-        const bgN = document.querySelectorAll('.bg-layer')[bgA.id === 'bg-1' ? 1 : 0];
+        const bgA = document.querySelector('.bg-layer.active'), bgN = document.querySelectorAll('.bg-layer')[bgA.id==='bg-1'?1:0];
+        bgN.style.backgroundImage = url(${s.i}); bgA.classList.remove('active'); bgN.classList.add('active');
         
-        bgN.style.backgroundImage = url(${s.img});
-        bgA.classList.remove('active');
-        bgN.classList.add('active');
+        document.getElementById('story-text').innerHTML = s.count ? "" : s.t;
+        document.getElementById('counter-box').style.display = s.count ? "flex" : "none";
+        document.getElementById('emo-msg').style.display = "none";
 
-        const txt = document.getElementById('story-text'), cb = document.getElementById('counter-box'), emo = document.getElementById('emotional-msg');
-        cb.style.display = 'none'; emo.style.display = 'none';
-
-        if(!s.isCounter) {
-            txt.style.display = 'block'; txt.innerHTML = s.text; txt.className = story-h1 animate__animated ${s.anim};
-        } else {
-            txt.style.display = 'none'; cb.style.display = 'flex'; runCounter();
+        if(s.count) {
+            const d = document.getElementById('slot-days'), m = document.getElementById('slot-months');
+            d.innerHTML = "<span>24</span><span>30</span><span>24</span>"; m.innerHTML = "<span>11</span><span>12</span>";
+            d.style.transform = "translateY(0)"; m.style.transform = "translateY(0)";
+            setTimeout(() => { 
+                d.style.transition = "transform 3s"; d.style.transform = "translateY(-160px)";
+                m.style.transition = "transform 2s"; m.style.transform = "translateY(-80px)";
+                setTimeout(() => {
+                    document.getElementById('counter-box').style.display = "none";
+                    document.getElementById('emo-msg').style.display = "block";
+                    document.getElementById('emo-msg').innerHTML = "FORAM OS 30 DIAS MAIS RÁPIDOS DA MINHA VIDA... ❤️";
+                }, 3500);
+            }, 100);
         }
 
-        fills.forEach((f, i) => {
-            f.style.transition = 'none'; f.style.width = i < idx ? '100%' : '0%';
-            if (i === idx) setTimeout(() => { f.style.transition = width ${duration}ms linear; f.style.width = '100%'; }, 50);
-        });
-        storyTimeout = setTimeout(nextStory, duration);
+        fills.forEach((f, i) => { f.style.transition = "none"; f.style.width = i < idx ? "100%" : "0%"; });
+        setTimeout(() => { fills[idx].style.transition = "width 10s linear"; fills[idx].style.width = "100%"; }, 50);
+        timer = setTimeout(() => change(1), 10000);
     }
 
-    function runCounter() {
-        const dCol = document.getElementById('slot-days'), mCol = document.getElementById('slot-months'), emo = document.getElementById('emotional-msg'), cb = document.getElementById('counter-box');
-        let dH = ""; for(let i=24; i<=54; i++) dH += <span>${(i>30?i-30:i)<10?'0'+(i>30?i-30:i):(i>30?i-30:i)}</span>;
-        dH += <span>24</span>; dCol.innerHTML = dH; mCol.innerHTML = "<span>11</span><span>12</span><span>11</span><span>12</span><span>11</span><span>12</span>";
-        dCol.style.transition = mCol.style.transition = "none"; dCol.style.transform = mCol.style.transform = "translateY(0)";
-        setTimeout(() => {
-            dCol.style.transition = "transform 4s cubic-bezier(0.15, 1, 0.3, 1)";
-            mCol.style.transition = "transform 3s cubic-bezier(0.15, 1, 0.3, 1)";
-            dCol.style.transform = translateY(-${31 * 110}px); mCol.style.transform = translateY(-${5 * 110}px);
-            setTimeout(() => {
-                cb.classList.add('animate_animated', 'animate_fadeOutDown');
-                setTimeout(() => {
-                    cb.style.display = 'none';
-                    emo.innerHTML = "FORAM OS 30 DIAS MAIS RÁPIDOS DA MINHA VIDA... ❤️";
-                    emo.style.display = 'block'; emo.className = "emotional-text animate_animated animate_zoomInDown";
-                    confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
-                }, 700);
-            }, 4500);
-        }, 100);
-    }
-
-    function nextStory() { if(currentIdx < stories.length - 1) showStory(currentIdx + 1); }
-    function prevStory() { if(currentIdx > 0) showStory(currentIdx - 1); }
+    function change(dir) { let n = curr + dir; if(n >= 0 && n < stories.length) show(n); }
 </script>
 </body>
 </html>
