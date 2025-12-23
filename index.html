@@ -1,7 +1,14 @@
-<!DOCTYPE html><html>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surpresa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
 
 <audio id="music" loop>
     <source src="https://www.dropbox.com/scl/fi/om1dgkxnjm4qms6xngj8q/WIU-Rol-de-Sempre-INSTRUMENTAL-8-Nota-Produ-es-youtube.mp3?rlkey=ibyl68ixd7xywgs8vwjqowtk2&st=y9t3rmt3&raw=1" type="audio/mpeg">
@@ -24,7 +31,6 @@
         
         <div class="content">
             <h1 id="story-text" class="story-h1"></h1>
-            
             <div id="counter-box" style="display:none;">
                 <div class="slot-machine">
                     <div class="slot-wrapper"><div id="slot-days" class="slot-column"></div></div>
@@ -32,7 +38,6 @@
                     <div class="slot-wrapper"><div id="slot-months" class="slot-column"></div></div>
                 </div>
             </div>
-
             <div id="emotional-msg" class="emotional-text animate__animated" style="display:none;"></div>
         </div>
 
@@ -50,9 +55,9 @@
     #cover-screen { position: absolute; inset: 0; z-index: 1000; background: #000; display: flex; align-items: center; justify-content: center; text-align: center; }
     .glow-text { font-family: 'Archivo Black'; font-size: 2.5rem; letter-spacing: 5px; margin-bottom: 20px; }
     .progress-container { width: 200px; height: 2px; background: rgba(255,255,255,0.1); margin: 20px auto; }
-    #loader-fill { width: 0%; height: 100%; background: var(--sp-green); transition: width 0.3s; }
-    #btn-play { background: white; border: none; padding: 15px 40px; border-radius: 50px; font-weight: 900; cursor: pointer; opacity: 0.5; transition: 0.5s; }
-    #btn-play.ready { opacity: 1; background: var(--sp-green); color: white; animation: pulse 1.5s infinite; }
+    #loader-fill { width: 0%; height: 100%; background: var(--sp-green); transition: width 3s linear; }
+    #btn-play { background: white; border: none; padding: 15px 40px; border-radius: 50px; font-weight: 900; cursor: pointer; transition: 0.5s; }
+    #btn-play.ready { background: var(--sp-green); color: white; animation: pulse 1.5s infinite; }
     .bg-layer { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 0.8s ease-in-out, transform 15s linear; z-index: 1; filter: brightness(0.6); }
     .bg-layer.active { opacity: 1; z-index: 2; transform: scale(1.15); }
     .vignette { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.9) 100%); z-index: 3; pointer-events: none; }
@@ -62,7 +67,6 @@
     .content { position: absolute; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
     .story-h1 { font-family: 'Archivo Black'; font-size: 3rem; text-transform: uppercase; line-height: 0.9; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     .slot-machine { display: flex; font-family: 'Archivo Black'; font-size: 5.5rem; color: var(--sp-green); height: 110px; overflow: hidden; margin-bottom: 20px; }
-    .slot-column { display: flex; flex-direction: column; }
     .slot-column span { height: 110px; display: flex; align-items: center; justify-content: center; }
     .emotional-text { font-family: 'Archivo Black'; font-size: 1.5rem; text-transform: uppercase; line-height: 1.2; color: white; width: 100%; max-width: 400px; margin-top: 20px; }
     .touch-zones { position: absolute; inset: 0; z-index: 200; display: flex; }
@@ -85,19 +89,19 @@
         { text: "Obrigado por<br>esse mês<br>incrível.", img: "https://www.dropbox.com/scl/fi/wmobvohy0kokqeulvmkxm/Foto-01-12-2025-04-04-11.jpg?rlkey=ti9pgszqajfitmgnsgyg9ub1x&st=06z1ayd0&raw=1", anim: "animate__heartBeat" }
     ];
 
-    let currentIdx = 0, storyTimeout, loaded = 0;
+    let currentIdx = 0, storyTimeout;
     const duration = 15000;
 
-    stories.forEach(s => {
-        const img = new Image(); img.src = s.img;
-        img.onload = () => {
-            loaded++;
-            document.getElementById('loader-fill').style.width = (loaded / stories.length * 100) + '%';
-            if(loaded === stories.length) {
-                const b = document.getElementById('btn-play'); b.innerText = "VER SURPRESA"; b.disabled = false; b.classList.add('ready');
-            }
-        };
-    });
+    // Força o carregamento do botão após 3 segundos
+    window.onload = () => {
+        document.getElementById('loader-fill').style.width = '100%';
+        setTimeout(() => {
+            const b = document.getElementById('btn-play');
+            b.innerText = "VER SURPRESA";
+            b.disabled = false;
+            b.classList.add('ready');
+        }, 3000);
+    };
 
     const fills = stories.map(() => {
         const b = document.createElement('div'); b.className = 'progress-bar'; b.innerHTML = '<div class="progress-fill"></div>';
@@ -113,16 +117,12 @@
     function showStory(idx) {
         if (idx < 0 || idx >= stories.length) return;
         currentIdx = idx; clearTimeout(storyTimeout);
-        
         const s = stories[idx];
         const bgA = document.querySelector('.bg-layer.active'), bgN = document.querySelectorAll('.bg-layer')[bgA.id === 'bg-1' ? 1 : 0];
         bgN.style.backgroundImage = url(${s.img}); bgA.classList.remove('active'); bgN.classList.add('active');
 
         const txt = document.getElementById('story-text'), cb = document.getElementById('counter-box'), emo = document.getElementById('emotional-msg');
-        
-        // Reset do contador ao mudar de slide
-        cb.style.display = 'none'; cb.classList.remove('animate__fadeOutDown');
-        emo.style.display = 'none'; emo.innerHTML = "";
+        cb.style.display = 'none'; emo.style.display = 'none';
 
         if(!s.isCounter) {
             txt.style.display = 'block'; txt.innerHTML = s.text; txt.className = story-h1 animate__animated ${s.anim};
@@ -152,7 +152,7 @@
                 cb.classList.add('animate_animated', 'animate_fadeOutDown');
                 setTimeout(() => {
                     cb.style.display = 'none';
-                    emo.innerHTML = "FORAM OS 30 DIAS MAIS RÁPIDOS DA MINHA VIDA... Talvez porque o tempo voa quando a gente tá com quem gosta. ❤️";
+                    emo.innerHTML = "FORAM OS 30 DIAS MAIS RÁPIDOS DA MINHA VIDA... ❤️";
                     emo.style.display = 'block'; emo.className = "emotional-text animate_animated animate_zoomInDown";
                     confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
                 }, 700);
@@ -163,4 +163,5 @@
     function nextStory() { if(currentIdx < stories.length - 1) showStory(currentIdx + 1); }
     function prevStory() { if(currentIdx > 0) showStory(currentIdx - 1); }
 </script>
+</body>
 </html>
