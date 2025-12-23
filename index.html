@@ -7,10 +7,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --sp-green: #1DB954; --pink: #f037a5; --orange: #f59b23; }
+        body, html { margin: 0; padding: 0; background: #000; color: white; font-family: 'Inter', sans-serif; overflow: hidden; height: 100%; }
+        #main-wrapper { width: 100%; height: 100vh; max-width: 450px; margin: 0 auto; position: relative; overflow: hidden; }
+        #cover-screen { position: absolute; inset: 0; z-index: 1000; background: #000; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .glow-text { font-family: 'Archivo Black'; font-size: 2.5rem; letter-spacing: 5px; margin-bottom: 20px; }
+        .progress-container { width: 200px; height: 2px; background: rgba(255,255,255,0.1); margin: 20px auto; overflow: hidden; }
+        #loader-fill { width: 0%; height: 100%; background: var(--sp-green); }
+        #btn-play { background: #555; color: #ccc; border: none; padding: 15px 40px; border-radius: 50px; font-weight: 900; cursor: pointer; transition: 0.5s; }
+        #btn-play.ready { background: var(--sp-green); color: white; animation: pulse 1.5s infinite; }
+        .bg-layer { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 0.8s ease-in-out, transform 15s linear; z-index: 1; filter: brightness(0.6); }
+        .bg-layer.active { opacity: 1; z-index: 2; transform: scale(1.15); }
+        .vignette { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.9) 100%); z-index: 3; pointer-events: none; }
+        #progress-header { position: absolute; top: 15px; width: 100%; display: flex; gap: 4px; padding: 0 10px; z-index: 100; box-sizing: border-box; }
+        .progress-bar { height: 3px; background: rgba(255,255,255,0.2); flex: 1; border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: white; width: 0%; }
+        .content { position: absolute; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+        .story-h1 { font-family: 'Archivo Black'; font-size: 2.8rem; text-transform: uppercase; line-height: 0.9; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .slot-machine { display: flex; font-family: 'Archivo Black'; font-size: 5rem; color: var(--sp-green); height: 110px; overflow: hidden; margin-bottom: 20px; }
+        .slot-column span { height: 110px; display: flex; align-items: center; justify-content: center; }
+        .emotional-text { font-family: 'Archivo Black'; font-size: 1.4rem; text-transform: uppercase; line-height: 1.2; color: white; width: 100%; max-width: 400px; margin-top: 20px; }
+        .touch-zones { position: absolute; inset: 0; z-index: 200; display: flex; }
+        .zone-left, .zone-right { flex: 1; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(29,185,84,0.7); } 70% { box-shadow: 0 0 0 15px rgba(29,185,84,0); } 100% { box-shadow: 0 0 0 0 rgba(29,185,84,0); } }
+    </style>
 </head>
 <body>
 
-<audio id="music" loop>
+<audio id="music" preload="auto" loop>
     <source src="https://www.dropbox.com/scl/fi/om1dgkxnjm4qms6xngj8q/WIU-Rol-de-Sempre-INSTRUMENTAL-8-Nota-Produ-es-youtube.mp3?rlkey=ibyl68ixd7xywgs8vwjqowtk2&st=y9t3rmt3&raw=1" type="audio/mpeg">
 </audio>
 
@@ -19,7 +44,7 @@
         <div class="loader-content">
             <h1 class="glow-text">SURPRESA</h1>
             <div class="progress-container"><div id="loader-fill"></div></div>
-            <button id="btn-play" onclick="startEverything()" disabled>PREPARANDO...</button>
+            <button id="btn-play" onclick="startEverything()" disabled>CARREGANDO...</button>
         </div>
     </div>
 
@@ -28,7 +53,6 @@
         <div id="bg-2" class="bg-layer"></div>
         <div class="vignette"></div>
         <div id="progress-header"></div>
-        
         <div class="content">
             <h1 id="story-text" class="story-h1"></h1>
             <div id="counter-box" style="display:none;">
@@ -40,39 +64,12 @@
             </div>
             <div id="emotional-msg" class="emotional-text animate__animated" style="display:none;"></div>
         </div>
-
         <div class="touch-zones">
             <div class="zone-left" onclick="prevStory()"></div>
             <div class="zone-right" onclick="nextStory()"></div>
         </div>
     </div>
 </div>
-
-<style>
-    :root { --sp-green: #1DB954; --pink: #f037a5; --orange: #f59b23; }
-    body, html { margin: 0; padding: 0; background: #000; color: white; font-family: 'Inter', sans-serif; overflow: hidden; height: 100%; }
-    #main-wrapper { width: 100%; height: 100vh; max-width: 450px; margin: 0 auto; position: relative; overflow: hidden; }
-    #cover-screen { position: absolute; inset: 0; z-index: 1000; background: #000; display: flex; align-items: center; justify-content: center; text-align: center; }
-    .glow-text { font-family: 'Archivo Black'; font-size: 2.5rem; letter-spacing: 5px; margin-bottom: 20px; }
-    .progress-container { width: 200px; height: 2px; background: rgba(255,255,255,0.1); margin: 20px auto; }
-    #loader-fill { width: 0%; height: 100%; background: var(--sp-green); transition: width 3s linear; }
-    #btn-play { background: white; border: none; padding: 15px 40px; border-radius: 50px; font-weight: 900; cursor: pointer; transition: 0.5s; }
-    #btn-play.ready { background: var(--sp-green); color: white; animation: pulse 1.5s infinite; }
-    .bg-layer { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 0.8s ease-in-out, transform 15s linear; z-index: 1; filter: brightness(0.6); }
-    .bg-layer.active { opacity: 1; z-index: 2; transform: scale(1.15); }
-    .vignette { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.9) 100%); z-index: 3; pointer-events: none; }
-    #progress-header { position: absolute; top: 15px; width: 100%; display: flex; gap: 4px; padding: 0 10px; z-index: 100; box-sizing: border-box; }
-    .progress-bar { height: 3px; background: rgba(255,255,255,0.2); flex: 1; border-radius: 2px; overflow: hidden; }
-    .progress-fill { height: 100%; background: white; width: 0%; }
-    .content { position: absolute; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
-    .story-h1 { font-family: 'Archivo Black'; font-size: 3rem; text-transform: uppercase; line-height: 0.9; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    .slot-machine { display: flex; font-family: 'Archivo Black'; font-size: 5.5rem; color: var(--sp-green); height: 110px; overflow: hidden; margin-bottom: 20px; }
-    .slot-column span { height: 110px; display: flex; align-items: center; justify-content: center; }
-    .emotional-text { font-family: 'Archivo Black'; font-size: 1.5rem; text-transform: uppercase; line-height: 1.2; color: white; width: 100%; max-width: 400px; margin-top: 20px; }
-    .touch-zones { position: absolute; inset: 0; z-index: 200; display: flex; }
-    .zone-left, .zone-right { flex: 1; }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(29,185,84,0.7); } 70% { box-shadow: 0 0 0 15px rgba(29,185,84,0); } 100% { box-shadow: 0 0 0 0 rgba(29,185,84,0); } }
-</style>
 
 <script>
     const stories = [
@@ -92,16 +89,20 @@
     let currentIdx = 0, storyTimeout;
     const duration = 15000;
 
-    // Força o carregamento do botão após 3 segundos
-    window.onload = () => {
-        document.getElementById('loader-fill').style.width = '100%';
+    // FORÇA A LIBERAÇÃO DO BOTÃO EM 2 SEGUNDOS INDEPEDENTE DE ERROS
+    window.addEventListener('DOMContentLoaded', () => {
+        const fill = document.getElementById('loader-fill');
+        const btn = document.getElementById('btn-play');
+        
+        fill.style.transition = "width 2s ease-in-out";
+        fill.style.width = "100%";
+
         setTimeout(() => {
-            const b = document.getElementById('btn-play');
-            b.innerText = "VER SURPRESA";
-            b.disabled = false;
-            b.classList.add('ready');
-        }, 3000);
-    };
+            btn.innerText = "VER SURPRESA";
+            btn.disabled = false;
+            btn.classList.add('ready');
+        }, 2100);
+    });
 
     const fills = stories.map(() => {
         const b = document.createElement('div'); b.className = 'progress-bar'; b.innerHTML = '<div class="progress-fill"></div>';
@@ -111,15 +112,20 @@
     function startEverything() {
         document.getElementById('cover-screen').style.display = 'none';
         document.getElementById('story-viewport').style.display = 'block';
-        document.getElementById('music').play(); showStory(0);
+        try { document.getElementById('music').play(); } catch(e) { console.log("Audio block"); }
+        showStory(0);
     }
 
     function showStory(idx) {
         if (idx < 0 || idx >= stories.length) return;
         currentIdx = idx; clearTimeout(storyTimeout);
         const s = stories[idx];
-        const bgA = document.querySelector('.bg-layer.active'), bgN = document.querySelectorAll('.bg-layer')[bgA.id === 'bg-1' ? 1 : 0];
-        bgN.style.backgroundImage = url(${s.img}); bgA.classList.remove('active'); bgN.classList.add('active');
+        const bgA = document.querySelector('.bg-layer.active') || document.getElementById('bg-1');
+        const bgN = document.querySelectorAll('.bg-layer')[bgA.id === 'bg-1' ? 1 : 0];
+        
+        bgN.style.backgroundImage = url(${s.img});
+        bgA.classList.remove('active');
+        bgN.classList.add('active');
 
         const txt = document.getElementById('story-text'), cb = document.getElementById('counter-box'), emo = document.getElementById('emotional-msg');
         cb.style.display = 'none'; emo.style.display = 'none';
@@ -142,12 +148,10 @@
         let dH = ""; for(let i=24; i<=54; i++) dH += <span>${(i>30?i-30:i)<10?'0'+(i>30?i-30:i):(i>30?i-30:i)}</span>;
         dH += <span>24</span>; dCol.innerHTML = dH; mCol.innerHTML = "<span>11</span><span>12</span><span>11</span><span>12</span><span>11</span><span>12</span>";
         dCol.style.transition = mCol.style.transition = "none"; dCol.style.transform = mCol.style.transform = "translateY(0)";
-
         setTimeout(() => {
             dCol.style.transition = "transform 4s cubic-bezier(0.15, 1, 0.3, 1)";
             mCol.style.transition = "transform 3s cubic-bezier(0.15, 1, 0.3, 1)";
             dCol.style.transform = translateY(-${31 * 110}px); mCol.style.transform = translateY(-${5 * 110}px);
-            
             setTimeout(() => {
                 cb.classList.add('animate_animated', 'animate_fadeOutDown');
                 setTimeout(() => {
